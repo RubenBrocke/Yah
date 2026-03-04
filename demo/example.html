@@ -1,0 +1,13 @@
+
+
+<div y-init="GET /api/products">
+    <template id="t_product" lang="mustache">
+        {{#products}}
+        <li class="product">{{id}} - {{name}}</li>
+        {{/products}}
+    </template>
+
+    <div id="product_list" y="@load @change(products) -> #t_product .">
+
+    </div>
+</div>
