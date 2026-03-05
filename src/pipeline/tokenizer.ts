@@ -21,7 +21,10 @@ export class Tokenizer {
     }
 
     private take() {
-        return this.text[this.index++]
+        this.skipWhitespace()
+        const char = this.text[this.index]
+        this.index += 1
+        return char
     }
 
     private match(char: string): Boolean {
@@ -61,10 +64,19 @@ export class Tokenizer {
                 case ',': tokens.push(new Token(TokenType.Comma, ",")); break;
                 case '$': tokens.push(new Token(TokenType.Sign, "$")); break;
                 case ':': tokens.push(new Token(TokenType.Colon, ":")); break;
+                case '(': tokens.push(new Token(TokenType.LParen, "(")); break;
+                case ')': tokens.push(new Token(TokenType.RParen, ")")); break;
                 case '[': tokens.push(new Token(TokenType.LBracket, "[")); break;
                 case ']': tokens.push(new Token(TokenType.RBracket, "]")); break;
                 case '{': tokens.push(new Token(TokenType.LBrace, "{")); break;
                 case '}': tokens.push(new Token(TokenType.RBrace, "}")); break;
+                case '"': 
+                    this.consume('"')
+                    const str = this.consumeWhile(/[^"]/)
+                    this.consume('"')
+                    tokens.push(new Token(TokenType.String, str))
+                    break;
+                case '=': tokens.push(new Token(TokenType.AssignOperator, "=")); break;
                 case '+':
                 case '-':
                 case '*':
@@ -75,21 +87,20 @@ export class Tokenizer {
                         tokens.push(new Token(TokenType.Operator, next_char))
                     }
                 default:
-                    if (/0-9/.test(next_char)) {
-                        let num = this.take() + this.consumeWhile(/0-9/)
+                    if (/[0-9]/.test(next_char)) {
+                        let num = next_char + this.consumeWhile(/[0-9]/)
                         if (this.match(".")) {
-                            num += this.consume(".") + this.consumeWhile(/0-9/)
+                            num += this.consume(".") + this.consumeWhile(/[0-9]/)
                         }
                         tokens.push(new Token(TokenType.Number, num))
                     }
-                    else if (/a-zA-Z_/.test(next_char)) {
-                        const id = this.take() + this.consumeWhile(/a-zA-Z0-9_/)
-                        if (Object.keys(HttpMethod).includes(id.toUpperCase()) {
+                    else if (/[a-zA-Z_]/.test(next_char)) {
+                        const id = next_char + this.consumeWhile(/[a-zA-Z0-9_]/)
+                        if (Object.keys(HttpMethod).includes(id.toUpperCase())) {
                             tokens.push(new Token(TokenType.HTTPMethod, id))
                         }
-                        else if (Object.keys(SwapMode).includes(id.toLowerCase())) {
+                        else if (Object.keys(SwapMode).includes(id.toUpperCase())) {
                             tokens.push(new Token(TokenType.Swapmode,id))
-                            break
                         }
                         else if (id.toLowerCase() === "render") {
                             tokens.push(new Token(TokenType.Render, "render"))
@@ -99,6 +110,7 @@ export class Tokenizer {
                         }
 
                     }
+                    break;
             }
         }
         tokens.push(new Token(TokenType.EOF, ""))

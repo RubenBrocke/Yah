@@ -1,44 +1,68 @@
 // Every element with a y-init or y attribute will be converted into a Component.
+import { EventBus } from "./event-bus";
 import { Pipeline } from "./pipeline";
+import { State } from "./state";
 
 export class Component {
-  el: HTMLElement;
-  parent: Component | null;
-  state: State; // each y-init attribute will add to the state
-  pipelines: Pipeline[]; // each y attribute will create a pipeline
+  element: HTMLElement
+  localState: State          // local to this component
+  scope: State               // nearest y-init ancestor's state
+  parent: Component | null   // nearest y-init Component
+  isScopeRoot: boolean       // Whether this component is defined as a scope root with y-init 
+  pipelines: Pipeline[] = []
 
-  constructor(el: HTMLElement, state: State, parent: Component | null) {
-    this.el = el;
-    this.state = state;
-    this.parent = parent;
-    this.pipelines = [];
+  constructor(element: HTMLElement, localState: State, scope: State, parent: Component | null) {
+    this.element = element
+    this.localState = localState
+    this.scope = scope
+    this.parent = parent
+    this.isScopeRoot = false
   }
 
-  public enrichFromElement(): void {
+  public populateLocalState(): void {
     // Include element attributes in the state
-    for (const attr of this.el.attributes) {
-      if (attr.name.startsWith("y-")) {
+    for (const attr of this.element.attributes) {
+      if (attr.name == "y-init" || attr.name == "y") {
         continue
       }
       if (attr.name === "class") {
         // Create class object where each class is a key with the value true.
-        const obj = {};
+        const obj: Record<string, boolean> = {};
         attr.value.split(" ").forEach(cls => obj[cls] = true);
-        this.state.set("class", obj);
+        this.localState.set("class", obj);
         continue;
       }
-      this.state.set(attr.name, attr.value);
+      this.localState.set(attr.name, attr.value);
     }
   }
 
   public getStateValue(name: string): any {
-    const value = this.state.get(name);
-    if (value !== undefined) {
-      return value;
-    }
+    const local = this.localState.get(name)
+    if (local !== undefined) { return local}
+    const value = this.scope.get(name);
+    if (value !== undefined) { return value }
     if (this.parent) {
       return this.parent.getStateValue(name);
     }
     return undefined;
+  }
+
+  public setStateValue(name: string, value: any): void {
+    // When setting we first need to check if a parent component has this state value
+    // If it does, we should set it there, otherwise we set it in the local state
+    if (this.parent && this.parent.getStateValue(name) !== undefined) {
+      this.parent.setStateValue(name, value);
+    } else {
+      this.scope.set(name, value);
+      // Trigger pipelines that depend on this state item (trigger event in event-bus)
+      const eventbus = EventBus.getInstance()
+      eventbus.publish(this, name)
+    }
+  }
+
+  public mergeState(newState: Record<string, any>): void {
+    for (const key in newState) {
+      this.setStateValue(key, newState[key]);
+    }
   }
 }

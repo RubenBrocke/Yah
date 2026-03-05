@@ -14,14 +14,14 @@
       {{/products}}
     </template>
 
-    <ul id="product_list" y="@load @change(products) -> #t_product .:insert"></ul>
+    <ul id="product_list" y="@products GET /test render #t_product insert ."></ul>
 
-    <form y-action="@submit { products += $product }">
+    <form y="@submit POST /api/products { products += response.product }">
       <input type="text" name="productName" placeholder="Product name">
       <button type="submit">Add Product</button>
     </form>
   </div>
 
   <!-- Include your library -->
-  <script type="module" src="dist/index.js"></script>
+  <script type="module" src="dist/yah.js"></script>
 </html>
