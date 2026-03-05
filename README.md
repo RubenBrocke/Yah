@@ -1,4 +1,4 @@
-# Yah — Yet Another HTMX Companion
+# Yah - Yet Another HTMX
 
 ## Introduction
 
@@ -57,7 +57,7 @@ This usage is similar to state initialization in Alpine.js.
 You can define simple values using an object-like syntax.
 
 ```html
-<div y-init="{ show: false }">
+<div y-init="{ show = false }">
 </div>
 ```
 
@@ -78,14 +78,18 @@ The JSON response is merged into the component’s state.
 
 ### The y Attribute
 
-The `y` attribute is the core directive of Yah.
+The y attribute is the core directive of Yah.
 
-It allows you to:
-- Trigger actions from events
-- Fetch JSON APIs
-- Render templates
-- Perform DOM swaps
-- Update state
+It defines a pipeline of actions using the following pattern:
+
+> trigger -> action -> action -> ...
+
+Each step in the pipeline runs sequentially.
+
+Typical steps include:
+- Fetching JSON APIs
+- Rendering templates
+- Updating the DOM
 
 ---
 
@@ -100,7 +104,7 @@ It allows you to:
   </template>
 
   <ul id="product_list"
-      y="@load @products -> #t_product .:insert">
+      y="@products render #t_products insert">
   </ul>
 </div>
 ```
@@ -108,11 +112,8 @@ It allows you to:
 This does the following:
 1. Fetches /api/products
 2. Stores the result in local state
-3. Triggers rendering when:
-   - the component loads
-   - the products value changes
-4. Renders the template #t_product
-5. Inserts the result into the <ul>
+3. Renders the template #t_product
+4. Inserts the result into the <ul> (default swap target is the element itself.)
 
 ---
 
@@ -147,41 +148,27 @@ Instead of merging the full response, this expression appends the new product to
 
 Since products changes, any listeners such as @products will automatically trigger.
 
----
-
-### y-action
-
-`y-action` is a simplified version of y.
-
-It focuses purely on client-side state updates and element manipulation, without making network requests.
-
-It also allows updating properties of the element itself.
-
----
-
-**Example**
+#### Client side beheaviour
 
 ```html
 <div y-init="{ open = false }">
   <div class="modal hidden"
-       y-action="@open { class.hidden = !open }">
+       y="@open { class.hidden = !open }">
+
+    <button y="@click { open = false }">
+        Close
+    </button>
   </div>
 
-  <button y-action="@click { open = true }">
+  <button y="@click { open = true }">
     Show!
   </button>
 </div>
 ```
 
-What happens here:
-1. The component starts with open = false
-2. Clicking the button sets open = true
-3. The @open action updates the modal
-4. The hidden class is removed when open becomes true
-
 ---
 
-Philosophy
+## Philosophy
 
 Yah aims to stay:
 - Small
