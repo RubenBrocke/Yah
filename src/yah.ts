@@ -1,10 +1,6 @@
-import { Scanner } from "./core/scanner.js";
-
 function init(): void {
-    const scanner = new Scanner(document.body);
-    const astNodes = scanner.scan();
-    console.log("Parsed AST Nodes:", astNodes);
-}
+   console.log("Yah initialized") 
+}  
 
 const Yah = { init };
 
