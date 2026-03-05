@@ -1,6 +1,11 @@
+import { Step } from "../steps/step";
 
-
-class Pipeline {
+export class Pipeline {
   triggers: string[]
-  steps: Step
+  steps: Step[]
+
+  constructor(triggers: string[], steps: Step[]) {
+    this.triggers = triggers
+    this.steps = steps
+  }
 }

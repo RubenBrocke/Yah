@@ -1,3 +1,6 @@
+import { HTTPStep } from "./http";
+import { RenderStep } from "./render";
+import { MutationStep } from "./mutation";
+import { SwapStep } from "./swap";
 
-
-type Step = HTTPStep | RenderStep | MutationStep | SwapStep
+export type Step = HTTPStep | RenderStep | MutationStep | SwapStep

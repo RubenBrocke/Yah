@@ -1,6 +1,6 @@
 
 
-class HTTPStep {
+export class HTTPStep {
     method: string
-    url: string
+    endpoint: string
 }

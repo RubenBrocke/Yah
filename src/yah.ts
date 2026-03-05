@@ -1,5 +1,9 @@
+import { Scannner } from "./dom/scanner";
+
 function init(): void {
-   console.log("Yah initialized") 
+    const scanner = new Scannner();
+    const components = scanner.scan(globalThis.document.body);
+    console.log("Yah initialized " + components.length + " components."); 
 }  
 
 const Yah = { init };

@@ -1,5 +1,9 @@
+import { Assignment } from "../pipeline/ast"
 
+export class MutationStep {
+    mutations: Assignment[]
 
-class MutationStep {
-    code: string
+    constructor(mutations: Assignment[]) {
+        this.mutations = mutations
+    }
 }
