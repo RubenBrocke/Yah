@@ -101,7 +101,7 @@ export class Parser {
                 return new SelfTemplateRenderStep()
             case TokenType.Hash:
                 this.consume(TokenType.Hash);
-                return new LocalTemplateRenderStep(this.consume(TokenType.Identifier).value)
+                return new LocalTemplateRenderStep('#' + this.consume(TokenType.Identifier).value)
             case TokenType.Operator:
                 if (this.peek().value == "/") {
                     return new RemoteTemplateRenderStep(this.parseEndpoint())
@@ -116,7 +116,7 @@ export class Parser {
     private parseSwapStep(): SwapStep {
         const mode = this.consume(TokenType.Swapmode).value;
         if (this.match(TokenType.Hash)) {
-            const selector = this.consume(TokenType.Identifier).value
+            const selector = this.consume(TokenType.Hash).value + this.consume(TokenType.Identifier).value
             return new SwapStep(mode, selector)
         } else if (this.match(TokenType.Dot)) {
             this.consume(TokenType.Dot)
@@ -221,7 +221,7 @@ export class Parser {
     private parseObject(): YObject {
         this.consume(TokenType.LBrace)
         const properties: { [key: string]: Expression } = {}
-        while (!this.match(TokenType.RBrace) && this.match(TokenType.Comma)) {
+        while (!this.match(TokenType.RBrace) || this.match(TokenType.Comma)) {
             if (this.match(TokenType.Comma)) { this.consume(TokenType.Comma) }
             const key = this.consume(TokenType.Identifier).value
             this.consume(TokenType.Colon)

@@ -1,4 +1,5 @@
 import { Scanner } from "./dom/scanner";
+import * as Mustache from "mustache"
 
 function init(): void {
     const scanner = new Scanner();

@@ -65,4 +65,24 @@ export class Component {
       this.setStateValue(key, newState[key]);
     }
   }
+
+  public dumpState(): Record<string, any> {
+    const dump: Record<string, any> = {}
+
+    // Merge local state first
+    if (this.localState) {
+        Object.assign(dump, this.localState.dump())
+    }
+
+    // Then merge scope
+    if (this.scope) {
+        Object.assign(dump, this.scope.dump())
+    }
+    // Then merge parent state
+    if (this.parent) {
+        Object.assign(dump, this.parent.dumpState())
+    }
+
+    return dump
+}
 }

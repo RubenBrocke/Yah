@@ -70,10 +70,9 @@ export class Tokenizer {
                 case ']': tokens.push(new Token(TokenType.RBracket, "]")); break;
                 case '{': tokens.push(new Token(TokenType.LBrace, "{")); break;
                 case '}': tokens.push(new Token(TokenType.RBrace, "}")); break;
-                case '"': 
-                    this.consume('"')
-                    const str = this.consumeWhile(/[^"]/)
-                    this.consume('"')
+                case "'": 
+                    const str = this.consumeWhile(/[^']/)
+                    this.consume("'")
                     tokens.push(new Token(TokenType.String, str))
                     break;
                 case '=': tokens.push(new Token(TokenType.AssignOperator, "=")); break;

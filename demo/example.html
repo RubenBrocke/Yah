@@ -1,13 +1,20 @@
-
-
+<!-- Example of a component -->
 <div y-init="GET /api/products">
+    <!-- Templates define what a component will be rendered as. These can also be remote html partials -->
     <template id="t_product" lang="mustache">
         {{#products}}
         <li class="product">{{id}} - {{name}}</li>
         {{/products}}
     </template>
 
-    <div id="product_list" y="@load @change(products) -> #t_product .">
+    <!-- This is the container element which rerenders the template on load and when the products state variable changes -->
+    <div id="product_list" y="@load @change(products) -> #t_product .:insert">
 
     </div>
+
+    <!-- This form adds a product to the list by first performing the request and then setting the products state variable -->
+    <form y="@submit POST /api/products { products += $product }">
+        <input type="text" name="name" placeholder="Product name">
+        <button type="submit">Add Product</button>
+    </form>
 </div>

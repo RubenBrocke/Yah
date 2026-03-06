@@ -1,7 +1,10 @@
 import { HTTPStep } from "../steps/http";
 import { MutationStep } from "../steps/mutation";
 import { Step } from "../steps/step";
+import { LocalTemplateRenderStep, SelfTemplateRenderStep, RemoteTemplateRenderStep } from "../steps/render";
 import { Component } from "./component";
+import { SwapStep } from "../steps/swap";
+import { State } from "./state";
 
 export class Pipeline {
     triggers: string[]
@@ -16,6 +19,7 @@ export class Pipeline {
 
     public async execute(): Promise<void> {
         console.log("executed pipeline with " + this.steps.length + " steps" )
+        let current_html = ""
         for (let i = 0; i < this.steps.length; i++) {
             const step = this.steps[i];
             if (step instanceof HTTPStep) {
@@ -32,7 +36,34 @@ export class Pipeline {
                     }
                 }
             }
+            if (step instanceof LocalTemplateRenderStep || step instanceof SelfTemplateRenderStep || step instanceof RemoteTemplateRenderStep) {
+                current_html = await step.execute(this.parent)
+            }
+            if (step instanceof MutationStep) {
+                await step.execute(this.parent)
+            }
+            if (step instanceof SwapStep) {
+                if (current_html.length === 0)
+                    throw new Error("No template rendered for swap step")
+                const new_node = globalThis.document.createElement("template")
+                new_node.innerHTML = current_html
+                await step.execute(this.parent, new_node.content.firstElementChild as HTMLElement)
+                current_html = ""
+            }
+        }
 
+        // If there is still a current_html value then we have insert that using default replace .
+        if (current_html.length !== 0) {
+            const new_step = new SwapStep("replace", ".")
+            const new_node = globalThis.document.createElement("template") 
+            new_node.innerHTML = current_html
+            await new_step.execute(this.parent, new_node.content.firstElementChild as HTMLElement)
+        }
+
+        // Consider clearing localState of a non-init component for clean re-triggers
+        if (!this.parent.isScopeRoot) {
+            this.parent.localState = new State()
+            this.parent.populateLocalState()
         }
     }
 }

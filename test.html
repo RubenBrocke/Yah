@@ -7,14 +7,14 @@
 <body>
 
   <!-- Component with y-init -->
-  <div y-init="{ products = [] }">
+  <div y-init="{ products = [{id: 0, name: 'product'}] }">
     <template id="t_product" lang="mustache">
       {{#products}}
       <li class="product">{{id}} - {{name}}</li>
       {{/products}}
     </template>
 
-    <ul id="product_list" y="@products GET /test render #t_product insert ."></ul>
+    <ul id="product_list" y="@products render #t_product insert ."></ul>
 
     <form y="@submit POST /api/products { products += response.product }">
       <input type="text" name="productName" placeholder="Product name">

@@ -32,4 +32,12 @@ export class State {
         const item = this.items.find(item => item.name === name);
         return item ? item.value : undefined;
     }
+
+    public dump(): Record<string, any> {
+        const dump: Record<string, any> = {}
+        for (const item of this.items) {
+            dump[item.name] = item.value
+        }
+        return dump
+    }
 }
